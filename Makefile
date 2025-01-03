@@ -1,5 +1,7 @@
 CXX := g++
-CXXFLAGS := -std=c++11 -I src/include -Wall -Wextra -O2
+DEBUG_FLAGS := -O0 -g
+RELEASE_FLAGS := -O2
+CXXFLAGS := -std=c++11 -I src/include -Wall -Wextra
 
 LDFLAGS := -L/usr/lib -L/usr/local/lib
 LDLIBS := -lssl -lcrypto
@@ -13,6 +15,12 @@ OBJS := $(patsubst $(SRC_DIR)/%.cpp, $(BLD_DIR)/%.o, $(SRCS))
 TARGET := $(BLD_DIR)/rushp
 
 all: $(TARGET)
+
+debug: CXXFLAGS += $(DEBUG_FLAGS)
+debug: all
+
+release: CXXFLAGS += $(RELEASE_FLAGS)
+release: all
 
 $(TARGET): $(OBJS)
 	@mkdir -p $(BLD_DIR)

@@ -9,6 +9,7 @@ Cluster::addSubCluster( const SubCluster & subCluster ) {
 		std::cerr << "Reached sub-cluster limit!" << std::endl;
 		exit( 1 );
 	}
-	subCluster_[ n_++ ] = std::move( subCluster );
+	subCluster_.push_back( std::move( subCluster ) );
+	n_++;
 	weight_ += ( subCluster.disks() * subCluster.weight() );
 }
