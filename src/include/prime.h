@@ -1,3 +1,6 @@
+#pragma once
+
+#include <cassert>
 #include <cmath>
 
 #include "hash.h"
@@ -23,6 +26,9 @@ nextPrime( int n ) {
 			return i;
 		}
 	}
+	assert( 0 && "Could not find a prime number" );
+	// Satisfy the compiler
+	return -1;
 }
 
 // Select the smallest prime number p >= a

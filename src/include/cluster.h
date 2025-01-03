@@ -1,3 +1,7 @@
+#pragma once
+
+#include <vector>
+
 #define MAX_SUB_CLUSTERS 10
 
 class SubCluster {
@@ -16,18 +20,18 @@ class SubCluster {
 			weight_ = _weight;
 		}
 
-		int weight() { return weight_; }
-		int disks() { return disks_; }
-		int startIndex() { return startIndex_; }
-}
+		int weight() const { return weight_; }
+		int disks() const { return disks_; }
+		int startIndex() const { return startIndex_; }
+};
 
 class Cluster {
-	int n = 0;
+	int n_ = 0;
 	int weight_ = 0; // Total weight of all the sub-clusters
 	std::vector< SubCluster > subCluster_;
 
 	public:
-		std::vector< const SubCluster & > & subCluster() { return subCluster_; }
+		const std::vector< SubCluster > & subCluster() const { return subCluster_; }
 		void addSubCluster( const SubCluster & );
-		int weight() { return weight_; }
+		int weight() const { return weight_; }
 };

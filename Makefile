@@ -1,27 +1,30 @@
-TARGET_EXEC := rushp
+CXX := g++
+CXXFLAGS := -std=c++11 -I src/include -Wall -Wextra -O2
 
-BUILD_DIR := ./build
-SRC_DIRS := ./src
+LDFLAGS := -L/usr/lib -L/usr/local/lib
+LDLIBS := -lssl -lcrypto
 
-SRCS := $(shell find $(SRC_DIRS) -name '*.cpp')
+SRC_DIR := src
+BLD_DIR := bld
+INCLUDE_DIR := src/include
 
-OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
+SRCS := $(wildcard $(SRC_DIR)/*.cpp)
+OBJS := $(patsubst $(SRC_DIR)/%.cpp, $(BLD_DIR)/%.o, $(SRCS))
+TARGET := $(BLD_DIR)/rushp
 
-DEPS := $(OBJS:.o=.d)
+all: $(TARGET)
 
-INC_DIRS := $(shell find $(SRC_DIRS) -type d)
+$(TARGET): $(OBJS)
+	@mkdir -p $(BLD_DIR)
+	$(CXX) $(OBJS) $(LDFLAGS) $(LDLIBS) -o $@
 
-INC_FLAGS := $(addprefix -I,$(INC_DIRS))
+$(BLD_DIR)/%.o: $(SRC_DIR)/%.cpp
+	@mkdir -p $(BLD_DIR)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-CPPFLAGS := $(INC_FLAGS) -MMD -MP
-
-$(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
-	$(CXX) $(OBJS) -o $@ $(LDFLAGS)
-
-$(BUILD_DIR)%.cpp.o: %.cpp
-	mkdir -p $(dir $@)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
-
-.PHONY: clean
 clean:
-	rm -r $(BUILD_DIR)
+	rm -rf $(BLD_DIR)
+
+rebuild: clean all
+
+.PHONY: all clean rebuild

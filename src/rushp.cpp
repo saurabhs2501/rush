@@ -1,4 +1,7 @@
+#include <vector>
+
 #include "hash.h"
+#include "prime.h"
 #include "rushp.h"
 
 // Returns a disk ID
@@ -10,14 +13,15 @@ RushP::rushp( int key, int replicas, const Cluster & cluster, int replicationFac
 	std::unordered_set< int > diskIds;
 	int totalWeight = cluster.weight();
 	int remainingReplicas = replicas;
+	const std::vector< SubCluster > & subClusters = cluster.subCluster();
 
 	// Try to place replicas in different sub-clusters
-	for ( int i = 0; i < cluster.subCluster().size(); i++ ) {
+	for ( std::vector< SubCluster >::size_type i = 0; i < subClusters.size(); i++ ) {
 		if ( remainingReplicas == 0 ) {
 			// All the replicas have been placed
 			break;
 		}
-		const SubCluster & subCluster = cluster.subCluster()[ i ];
+		const SubCluster & subCluster = subClusters[ i ];
 		int numDisks = subCluster.disks();
 		int startIndex = subCluster.startIndex();
 		int weight = subCluster.weight();
@@ -39,8 +43,8 @@ RushP::rushp( int key, int replicas, const Cluster & cluster, int replicationFac
 				int localIndex = ( auxV + hash( key, i, j ) ) % numDisks;
 				int globalIndex = startIndex + localIndex;
 				if ( uniquePlacements.find( globalIndex ) == uniquePlacements.end() ) {
-					uniquePlacements.put( globalIndex );
-					diskIds.put( globalIndex );
+					uniquePlacements.insert( globalIndex );
+					diskIds.insert( globalIndex );
 				}
 			}
 		// Case 2 : Sub-cluster has fewer disks than the replication factor.  Additional condition ensures
@@ -51,16 +55,16 @@ RushP::rushp( int key, int replicas, const Cluster & cluster, int replicationFac
 			for ( int j = 0; j < replicasToPlace; ++j ) {
 				int localIndex = ( auxV + hash( key, i, j ) ) % replicationFactor;
 				int globalIndex = startIndex + localIndex;
-				if ( diskIds.find( globalIndex ) == globalIndex.end() ) {
-					diskIds.put( globalIndex );
+				if ( diskIds.find( globalIndex ) == diskIds.end() ) {
+					diskIds.insert( globalIndex );
 				}
 			}
 		} else {
 			for ( int j = 0; j < replicasToPlace; ++j ) {
 				int localIndex = ( auxV + hash( key, i, j ) ) % numDisks;
 				int globalIndex = startIndex + localIndex;
-				if ( diskIds.find( globalIndex ) == globalIndex.end() ) {
-					diskIds.put( globalIndex );
+				if ( diskIds.find( globalIndex ) == diskIds.end() ) {
+					diskIds.insert( globalIndex );
 				}
 			}
 		}

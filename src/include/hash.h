@@ -1,12 +1,16 @@
+#pragma once
+
 #include <cstdlib>
 #include <openssl/evp.h>
+#include <iostream>
 #include <string>
 
 #define OPENSSL_ENGINE NULL
 
 const std::string sha256( const std::string & input ) {
 	EVP_MD_CTX *mdCtx = EVP_MD_CTX_new();
-	if ( !EVP_DigestInit_ex( mdCtx, EVP_sha256(), OPENSSL_ENGINE ) ) {
+	const EVP_MD *md = EVP_sha256();
+	if ( !EVP_DigestInit_ex( mdCtx, md, OPENSSL_ENGINE ) ) {
 		std::cerr << "Message digest initialization failed" << std::endl;
 		EVP_MD_CTX_free( mdCtx );
 		exit( EXIT_FAILURE );
@@ -19,16 +23,18 @@ const std::string sha256( const std::string & input ) {
 		exit( EXIT_FAILURE );
 	}
 
-	std::string mdVal;
-	int mdLen;
+	unsigned int mdLen = EVP_MD_size( md );
+	std::string mdVal( mdLen, '\0' );
 
-	if ( !EVP_DigestFinal_ex( mdCtx, mdVal.c_str(), &mdLen ) ) {
+	if ( !EVP_DigestFinal_ex( mdCtx, reinterpret_cast< unsigned char * >( &mdVal[ 0 ] ), &mdLen ) ) {
 		std::cerr << "Message digest finalizaion failed" << std::endl;
 		EVP_MD_CTX_free( mdCtx );
 		exit( EXIT_FAILURE );
 	}
 
 	EVP_MD_CTX_free( mdCtx );
+
+	mdVal.resize( mdLen );
 
 	return mdVal;
 }
